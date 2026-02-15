@@ -1,0 +1,147 @@
+<h4 mat-dialog-title>Query Builder</h4>
+
+<div class="query-builder">
+  <mat-dialog-content>
+    <div class="qb-layout">
+      <aside class="category-panel">
+        <div class="panel-label">Query Categories</div>
+        <button
+          type="button"
+          class="category-btn"
+          *ngFor="let category of categories"
+          [class.active]="activeCategoryKey === category.key"
+          [style.border-left-color]="
+            activeCategoryKey === category.key ? category.color : 'transparent'
+          "
+          (click)="setActiveCategory(category.key)"
+        >
+          <span class="category-icon">{{ category.icon }}</span>
+          <span class="category-title">{{ category.label }}</span>
+        </button>
+
+        <div class="history-block" *ngIf="history.length">
+          <div class="panel-label">Recent Queries</div>
+          <div class="history-row" *ngFor="let item of history | slice: 0 : 5">
+            <div class="history-name">{{ item.query }}</div>
+            <div class="history-meta">{{ item.time }} - {{ item.count }} results</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="query-workspace">
+        <div class="query-list">
+          <div class="panel-label">{{ activeCategory.label }} Queries</div>
+          <button
+            type="button"
+            class="query-item"
+            *ngFor="let query of activeCategory.queries"
+            [class.active]="activeQuery?.id === query.id"
+            (click)="selectQuery(query)"
+          >
+            <div class="query-item-title">{{ query.name }}</div>
+            <div class="query-item-desc">{{ query.description }}</div>
+          </button>
+        </div>
+
+        <div class="query-detail" *ngIf="activeQuery; else queryEmptyState">
+          <div class="detail-header">
+            <div>
+              <div class="detail-title">{{ activeQuery.name }}</div>
+              <div class="detail-subtitle">{{ activeQuery.description }}</div>
+            </div>
+            <div class="detail-actions">
+              <button type="button" class="run-btn" [disabled]="isRunning" (click)="runQuery()">
+                {{ isRunning ? 'Running...' : 'Execute Query' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="params-grid">
+            <div class="param-field" *ngFor="let param of activeQuery.params">
+              <label>
+                {{ param.label }}
+                <span *ngIf="param.unit">({{ param.unit }})</span>
+              </label>
+
+              <select
+                *ngIf="param.type === 'select'"
+                [ngModel]="params[param.key]"
+                (ngModelChange)="updateParam(param, $event)"
+              >
+                <option *ngFor="let option of param.options" [value]="option">{{ option }}</option>
+              </select>
+
+              <input
+                *ngIf="param.type !== 'select'"
+                [type]="param.type"
+                [ngModel]="params[param.key]"
+                (ngModelChange)="updateParam(param, $event)"
+              />
+            </div>
+          </div>
+
+          <div class="sql-preview" *ngIf="showSQL">
+            <div class="sql-title">PostGIS / SQL Preview</div>
+            <pre>{{ generatedSQL }}</pre>
+          </div>
+
+          <div class="result-bar" *ngIf="results && !isRunning">
+            <div class="result-text">
+              Query returned <strong>{{ results.count }}</strong> features in {{ results.time }}s
+            </div>
+            <div class="result-actions">
+              <button type="button">Export CSV</button>
+              <button type="button">Export SHP</button>
+              <button type="button">Print Map</button>
+            </div>
+          </div>
+
+          <div class="map-preview">
+            <div class="map-title">Map Preview</div>
+            <div class="map-canvas" [class.running]="isRunning">
+              <div *ngIf="isRunning">Processing spatial query...</div>
+              <div *ngIf="!isRunning && results">
+                {{ results.count }} features highlighted for {{ results.query }}
+              </div>
+              <div *ngIf="!isRunning && !results">
+                Run the query to preview highlighted features.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #queryEmptyState>
+          <div class="query-empty">
+            <div class="empty-title">Select a Query to Begin</div>
+            <div class="empty-subtitle">
+              Choose a category and query from the left panels to configure parameters and execute.
+            </div>
+            <div class="empty-tags">
+              <span>Flood Analysis</span>
+              <span>Land Search</span>
+              <span>Zoning Check</span>
+              <span>Revenue Report</span>
+            </div>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <app-custom-buttons
+      buttonText="Close"
+      buttonIcon="cancel"
+      buttonStyle="secondary"
+      mat-dialog-close
+    ></app-custom-buttons>
+
+    <app-custom-buttons
+      buttonText="Apply"
+      buttonIcon="check"
+      buttonStyle="primary"
+      [disabled]="!activeQuery"
+      (buttonClick)="applyQuery()"
+    ></app-custom-buttons>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,303 @@
+<h4 mat-dialog-title>Reports</h4>
+
+<div class="reports-dialog">
+  <mat-dialog-content>
+    <div class="reports-shell">
+      <div class="reports-header">
+        <div>
+          <h2>Parcel Information</h2>
+          <div class="parcel-id">{{ displayFeatureId }}</div>
+        </div>
+        <div class="reports-header-right">
+          <span class="status-badge" [ngClass]="statusClass">{{ parcel.status }}</span>
+          <div class="last-updated">
+            <div>Last Updated</div>
+            <div>{{ parcel.lastUpdated }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-stats">
+        <div class="quick-stat" *ngFor="let item of quickStats">
+          <div class="quick-label">{{ item.label }}</div>
+          <div class="quick-value">{{ item.value }}</div>
+          <div class="quick-sub" *ngIf="item.sub">{{ item.sub }}</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button
+          type="button"
+          class="tab-btn"
+          *ngFor="let tab of tabs"
+          [class.active]="activeTab === tab.id"
+          (click)="setTab(tab.id)"
+        >
+          {{ tab.label }}
+          <span class="tab-count" *ngIf="tab.count !== undefined">{{ tab.count }}</span>
+        </button>
+      </div>
+
+      <div class="tab-content">
+        <div *ngIf="activeTab === 'overview'">
+          <div class="section-title">Parcel Overview</div>
+          <div class="field-grid col-3 w-100">
+            <div class="field">
+              <label>Parcel ID</label>
+              <div>{{ parcel.parcelId }}</div>
+            </div>
+            <div class="field">
+              <label>Survey Plan No.</label>
+              <div>{{ parcel.surveyPlan }}</div>
+            </div>
+            <div class="field">
+              <label>Survey Date</label>
+              <div>{{ parcel.surveyDate }}</div>
+            </div>
+            <div class="field">
+              <label>Deed Number</label>
+              <div>{{ parcel.deedNo }}</div>
+            </div>
+            <div class="field">
+              <label>Registration Date</label>
+              <div>{{ parcel.registrationDate }}</div>
+            </div>
+            <div class="field">
+              <label>Land Registry Folio</label>
+              <div>{{ parcel.landRegistryFolio }}</div>
+            </div>
+            <div class="field wide">
+              <label>Street Address</label>
+              <div>{{ parcel.streetAddress }}</div>
+            </div>
+          </div>
+
+          <div class="section-title mt">Boundaries</div>
+          <div class="boundary-grid">
+            <div class="boundary-card" *ngFor="let item of boundaryCards">
+              <div class="boundary-short">{{ item.short }}</div>
+              <div>
+                <div class="boundary-label">{{ item.label }}</div>
+                <div class="boundary-value">{{ item.value }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab === 'ownership'">
+          <div class="section-title">Ownership Details</div>
+          <div class="owner-list">
+            <div class="owner-card" *ngFor="let owner of parcel.owners">
+              <div class="field">
+                <label>Owner Name</label>
+                <div>{{ owner.name }}</div>
+              </div>
+              <div class="field">
+                <label>NIC Number</label>
+                <div>{{ owner.nic }}</div>
+              </div>
+              <div class="field">
+                <label>Share</label>
+                <div>{{ owner.share }}</div>
+              </div>
+              <div class="field">
+                <label>Since</label>
+                <div>{{ owner.since }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab === 'land'">
+          <div class="section-title">Land Characteristics</div>
+          <div class="field-grid col-3 w-100">
+            <div class="field">
+              <label>Acres</label>
+              <div>{{ parcel.extent.acres }} Ac</div>
+            </div>
+            <div class="field">
+              <label>Roods</label>
+              <div>{{ parcel.extent.roods }} Rd</div>
+            </div>
+            <div class="field">
+              <label>Perches</label>
+              <div>{{ parcel.extent.perches }} P</div>
+            </div>
+            <div class="field">
+              <label>Square Meters</label>
+              <div>{{ parcel.extent.sqMeters }} m2</div>
+            </div>
+            <div class="field">
+              <label>Elevation</label>
+              <div>{{ parcel.elevation }}</div>
+            </div>
+            <div class="field">
+              <label>Terrain</label>
+              <div>{{ parcel.terrain }}</div>
+            </div>
+            <div class="field">
+              <label>Flood Zone</label>
+              <div>{{ parcel.floodZone }}</div>
+            </div>
+            <div class="field">
+              <label>Soil Type</label>
+              <div>{{ parcel.soilType }}</div>
+            </div>
+            <div class="field">
+              <label>Road Frontage</label>
+              <div>{{ parcel.roadFrontage }}</div>
+            </div>
+            <div class="field">
+              <label>Access Road Class</label>
+              <div>{{ parcel.accessRoad }}</div>
+            </div>
+          </div>
+
+          <div class="section-title mt">Utilities & Services</div>
+          <div class="chip-row">
+            <span class="chip" *ngFor="let utility of parcel.utilities">{{ utility }}</span>
+          </div>
+
+          <div class="section-title mt">Zoning & Planning</div>
+          <div class="field-grid col-2 w-100">
+            <div class="field">
+              <label>Zoning Classification</label>
+              <div>{{ parcel.zoning }}</div>
+            </div>
+            <div class="field">
+              <label>Land Use</label>
+              <div>{{ parcel.landUse }}</div>
+            </div>
+            <div class="field">
+              <label>Max Building Coverage</label>
+              <div>{{ parcel.buildingCoverage }}</div>
+            </div>
+            <div class="field">
+              <label>Floor Area Ratio (FAR)</label>
+              <div>{{ parcel.floorAreaRatio }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab === 'admin'">
+          <div class="section-title">Administrative Hierarchy</div>
+          <div class="admin-stack">
+            <div
+              class="admin-row"
+              *ngFor="let item of adminHierarchy; let i = index"
+              [style.margin-left.px]="i * 10"
+            >
+              <div class="admin-level">{{ item.level }}</div>
+              <div class="admin-value">{{ item.value }}</div>
+            </div>
+          </div>
+
+          <div class="section-title mt">GN Officer</div>
+          <div class="field-grid col-2 w-100">
+            <div class="field">
+              <label>GN Officer Name</label>
+              <div>{{ parcel.gnOfficer }}</div>
+            </div>
+            <div class="field">
+              <label>GN Division Code</label>
+              <div>{{ parcel.gnDivision }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab === 'valuation'">
+          <div class="section-title">Valuation & Assessment</div>
+
+          <div class="valuation-cards">
+            <div class="valuation-card highlight">
+              <div class="valuation-label">Annual Value</div>
+              <div class="valuation-value">{{ formatCurrency(parcel.annualValue) }}</div>
+            </div>
+            <div class="valuation-card">
+              <div class="valuation-label">Annual Rates</div>
+              <div class="valuation-value">{{ formatCurrency(parcel.rates) }}</div>
+            </div>
+            <div class="valuation-card">
+              <div class="valuation-label">Rates Paid Up To</div>
+              <div class="valuation-value">{{ parcel.ratesPaidUpto }}</div>
+            </div>
+          </div>
+
+          <div class="field-grid col-2 w-100">
+            <div class="field">
+              <label>Assessment Number</label>
+              <div>{{ parcel.assessmentNo }}</div>
+            </div>
+            <div class="field">
+              <label>Land Registry Folio</label>
+              <div>{{ parcel.landRegistryFolio }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="activeTab === 'encumbrances'">
+          <div class="section-title">Encumbrances & Legal</div>
+          <div *ngIf="parcel.encumbrances.length; else noEncumbrance" class="enc-list">
+            <div class="enc-card" *ngFor="let enc of parcel.encumbrances">
+              <div class="field">
+                <label>Type</label>
+                <div>{{ enc.type }}</div>
+              </div>
+              <div class="field">
+                <label>Institution</label>
+                <div>{{ enc.institution }}</div>
+              </div>
+              <div class="field">
+                <label>Amount</label>
+                <div>{{ enc.amount }}</div>
+              </div>
+              <div class="field">
+                <label>Date</label>
+                <div>{{ enc.date }}</div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noEncumbrance>
+            <div class="empty-note">No encumbrances registered against this parcel.</div>
+          </ng-template>
+
+          <div class="section-title mt">Deed Information</div>
+          <div class="field-grid col-2 w-100">
+            <div class="field">
+              <label>Deed Number</label>
+              <div>{{ parcel.deedNo }}</div>
+            </div>
+            <div class="field">
+              <label>Registration Date</label>
+              <div>{{ parcel.registrationDate }}</div>
+            </div>
+            <div class="field">
+              <label>Land Registry Folio</label>
+              <div>{{ parcel.landRegistryFolio }}</div>
+            </div>
+            <div class="field">
+              <label>Survey Plan</label>
+              <div>{{ parcel.surveyPlan }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <app-custom-buttons
+      buttonText="Download"
+      buttonIcon="download"
+      buttonStyle="primary"
+      (buttonClick)="downloadPdf()"
+    ></app-custom-buttons>
+
+    <app-custom-buttons
+      buttonText="Close"
+      buttonIcon="cancel"
+      buttonStyle="secondary"
+      mat-dialog-close
+    ></app-custom-buttons>
+  </mat-dialog-actions>
+</div>

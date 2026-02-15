@@ -1,0 +1,573 @@
+<div class="land-tab-content">
+  <div class="land-tab-title">Feature ID: {{ selected_feature_ID }}</div>
+
+  <div style="display: flex; justify-content: flex-end; margin: 6px 5px 0 0">
+    <button class="edit-button sm-inner-section-btn" type="button" (click)="openReportsDialog()">
+      <i class="fa fa-file-pdf"></i> Reports
+    </button>
+  </div>
+
+  <div class="parcel-image-container">
+    <div class="parcel-image">
+      <div class="hover-text">Upload New Image</div>
+      <img [src]="parsal_image ? parsal_image : 'sample/s_img_1.jpg'" alt="Parcel Image" />
+    </div>
+
+    <label class="save-icon" (click)="saveImage()">
+      <i class="fa fa-save"></i>
+      <span class="upload-hover-text">Save Image</span>
+    </label>
+
+    <label *ngIf="!parsal_image" class="upload-icon">
+      <input type="file" (change)="onFileSelected($event)" accept=".png,.webp,.jpg,.jpeg" hidden />
+      <i class="fa fa-upload"></i>
+      <span class="upload-hover-text">Click to Upload</span>
+    </label>
+
+    <label *ngIf="parsal_image" class="delete-icon" (click)="deleteImage()">
+      <i class="fa-solid fa-trash"></i>
+      <span class="delete-hover-text">Delete Image</span>
+    </label>
+  </div>
+
+  <div class="parcel-image-container">
+    <app-loader [isLoading]="is_loading_summary"></app-loader>
+
+    <div class="keyValue__key property-title-section" *ngIf="canSummaryView(10)">
+      <ng-container *ngIf="summaryPropertyType; else noPropertyType">
+        {{ summaryPropertyType }} Property
+      </ng-container>
+      <ng-template #noPropertyType>-</ng-template>
+    </div>
+
+    <div class="keyValueWrapper" *ngIf="canViewRRR(38)">
+      <div class="keyValueWrapper__keyValue d-flex align-items-center">
+        <div class="keyValue__key">{{ isCoOwners ? 'Co-Owners' : 'Owner' }}</div>
+        <div class="keyValue__value">
+          <ng-container *ngIf="summaryOwner && summaryOwner.trim(); else noOwner">
+            {{ summaryOwner }}
+          </ng-container>
+          <ng-template #noOwner>-</ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div class="keyValueWrapper" *ngIf="canSummaryView(11)">
+      <div class="keyValueWrapper__keyValue d-flex align-items-center">
+        <div class="keyValue__key">Address</div>
+        <div class="keyValue__value">
+          <ng-container *ngIf="summaryPostalAdLnd; else noAddress">
+            {{ summaryPostalAdLnd }}
+          </ng-container>
+          <ng-template #noAddress>-</ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('identification')"
+      [ngClass]="{ active: isSectionExpanded('identification') }"
+    >
+      Identification & Administrative
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('identification') }"
+        >&#9660;</span
+      >
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('identification')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Parcel ID</div>
+          <input
+            type="text"
+            readonly
+            class="keyValue__value"
+            [value]="valueOrDash(selected_feature_ID)"
+          />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Cadastral Ref.</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="land_tenure.reference_no" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Parcel Type</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="lt_asses_and_tax.property_type" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Status</div>
+          <input type="text" readonly class="keyValue__value" [value]="parcelStatusLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Land Use</div>
+          <select class="keyValue__value" [(ngModel)]="landInfo.ext_landuse_type">
+            <option value="" disabled selected>Select land use</option>
+            <option *ngFor="let option of land_ext_landuse_type_array" [value]="option.name">
+              {{ option.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Tenure Type</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="land_tenure.right_type" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Registration Date</div>
+          <input type="text" class="keyValue__value" [value]="registrationDateLabel" readonly />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper" *ngIf="canView(2)">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Province</div>
+          <input type="text" readonly class="keyValue__value" [(ngModel)]="adminInfo.pd" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper" *ngIf="canView(3)">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">District</div>
+          <input type="text" readonly class="keyValue__value" [(ngModel)]="adminInfo.dist" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper" *ngIf="canView(4)">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">DS Division</div>
+          <input type="text" readonly class="keyValue__value" [(ngModel)]="adminInfo.dsd" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper" *ngIf="canView(8)">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Local Authority</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="adminInfo.local_auth" />
+        </div>
+      </div>
+
+      <div class="save-button-container">
+        <button class="sm-inner-section-btn edit-button" (click)="saveData('lt_admin_info')">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('spatial')"
+      [ngClass]="{ active: isSectionExpanded('spatial') }"
+    >
+      Spatial / Geometric (2D)
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('spatial') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('spatial')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Area (m²)</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="landInfo.area" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Perimeter (m)</div>
+          <input type="text" readonly class="keyValue__value" [value]="perimeterLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Geometry Type</div>
+          <input type="text" readonly class="keyValue__value" [value]="geometryTypeLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Boundary Type</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="adminInfo.sl_land_type" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Vertices</div>
+          <input type="text" readonly class="keyValue__value" [value]="verticesCountLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">CRS</div>
+          <input type="text" readonly class="keyValue__value" [value]="crsLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Centroid (Lon)</div>
+          <input type="text" readonly class="keyValue__value" [value]="centroidLonLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Centroid (Lat)</div>
+          <input type="text" readonly class="keyValue__value" [value]="centroidLatLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Reference Coordinate</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="landInfo.reference_coordinate" />
+        </div>
+      </div>
+
+      <div class="save-button-container">
+        <button class="sm-inner-section-btn edit-button" (click)="saveData('land_overview')">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('physical')"
+      [ngClass]="{ active: isSectionExpanded('physical') }"
+    >
+      Physical & Environmental
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('physical') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('physical')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Elevation</div>
+          <input type="text" class="keyValue__value" placeholder="-" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Slope</div>
+          <input type="text" class="keyValue__value" placeholder="-" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Soil Type</div>
+          <input type="text" class="keyValue__value" placeholder="-" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Flood Zone</div>
+          <input type="text" class="keyValue__value" placeholder="-" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Road Access</div>
+          <input type="text" readonly class="keyValue__value" [value]="hasRoadAccess" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Utilities</div>
+          <input type="text" readonly class="keyValue__value" [value]="utilitiesLabel" />
+        </div>
+      </div>
+
+      <div class="save-button-container">
+        <button class="sm-inner-section-btn edit-button" (click)="saveData('lt_util_info')">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('zoning')"
+      [ngClass]="{ active: isSectionExpanded('zoning') }"
+    >
+      Zoning & Development Controls
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('zoning') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('zoning')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Zoning Category</div>
+          <input type="text" class="keyValue__value" [value]="zoningCategoryLabel" readonly />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Max Coverage (%)</div>
+          <input
+            type="text"
+            class="keyValue__value"
+            [(ngModel)]="lt_asses_and_tax.assessment_percentage"
+          />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Max FAR</div>
+          <input
+            type="text"
+            class="keyValue__value"
+            [(ngModel)]="lt_asses_and_tax.tax_percentage"
+          />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Special Overlay</div>
+          <input type="text" class="keyValue__value" [(ngModel)]="adminInfo.remark" />
+        </div>
+      </div>
+
+      <div class="save-button-container">
+        <button class="sm-inner-section-btn edit-button" (click)="saveData('lt_asses')">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('rrr')"
+      [ngClass]="{ active: isSectionExpanded('rrr') }"
+    >
+      Rights, Restrictions & Responsibilities
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('rrr') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('rrr')">
+      <div class="keyValueWrapper" *ngFor="let entry of rrrEntries">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">{{ valueOrDash(entry.party_name) }}</div>
+          <div class="keyValue__value">
+            {{ valueOrDash(entry.party_role_type) }} | Share: {{ valueOrDash(entry.share) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper" *ngIf="!rrrEntries.length">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">No RRR entries</div>
+          <div class="keyValue__value">-</div>
+        </div>
+      </div>
+
+      <button
+        mat-button
+        class="admin-primary-bg-btn"
+        (click)="openRRRPanel()"
+        *ngIf="canViewRRR(38) || canAddRRR(38)"
+      >
+        Open RRR Panel
+      </button>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('valuation')"
+      [ngClass]="{ active: isSectionExpanded('valuation') }"
+    >
+      Tax & Valuation
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('valuation') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('valuation')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Land Value</div>
+          <input
+            type="text"
+            class="keyValue__value"
+            [(ngModel)]="lt_asses_and_tax.assessment_annual_value"
+          />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Market Value</div>
+          <input
+            type="text"
+            class="keyValue__value"
+            [(ngModel)]="lt_asses_and_tax.tax_annual_value"
+          />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Annual Tax</div>
+          <input type="text" readonly class="keyValue__value" [value]="annualTaxLabel" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Last Assessment</div>
+          <input
+            type="text"
+            class="keyValue__value"
+            [(ngModel)]="lt_asses_and_tax.date_of_valuation"
+          />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Tax Status</div>
+          <input type="text" readonly class="keyValue__value" [value]="taxStatusLabel" />
+        </div>
+      </div>
+
+      <div class="save-button-container">
+        <button class="sm-inner-section-btn edit-button" (click)="saveData('lt_asses')">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('relationships')"
+      [ngClass]="{ active: isSectionExpanded('relationships') }"
+    >
+      Relationships
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('relationships') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('relationships')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Buildings on Parcel</div>
+          <div class="keyValue__value">-</div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Adjacent Parcels</div>
+          <input type="text" class="keyValue__value" placeholder="Comma-separated parcel IDs" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Parent Parcel</div>
+          <input type="text" class="keyValue__value" placeholder="If subdivided from" />
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Child Parcels</div>
+          <input type="text" class="keyValue__value" placeholder="If further subdivided" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-container">
+    <button
+      class="toggle-button"
+      (click)="toggleSection('metadata')"
+      [ngClass]="{ active: isSectionExpanded('metadata') }"
+    >
+      Metadata & Quality
+      <span class="arrow" [ngClass]="{ rotated: isSectionExpanded('metadata') }">&#9660;</span>
+    </button>
+
+    <div class="keyValueList" *ngIf="isSectionExpanded('metadata')">
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Quality ID</div>
+          <div class="keyValue__value">{{ valueOrDash(selected_feature_ID) }}</div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Accuracy Level</div>
+          <div class="keyValue__value">-</div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Survey Method</div>
+          <div class="keyValue__value">-</div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Last Updated</div>
+          <div class="keyValue__value">{{ metadataLastUpdatedLabel }}</div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Responsible Party</div>
+          <div class="keyValue__value">{{ metadataResponsibleLabel }}</div>
+        </div>
+      </div>
+
+      <div class="keyValueWrapper">
+        <div class="keyValueWrapper__keyValue">
+          <div class="keyValue__key">Source Document</div>
+          <div class="keyValue__value">{{ metadataSourceDocLabel }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
